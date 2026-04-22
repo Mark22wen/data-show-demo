@@ -17,28 +17,32 @@ st.divider()
 st.subheader("数据库总览")
 st.dataframe(df,use_container_width=True,hide_index=True)
 st.divider()
-st.subheader("自主选择指标生成趋势图")
+st.subheader("自适应可视化")
 if"年份"in df.columns:
-    x_axis_col = "年份"
-elif"时间"in df.columns:
-    x_axis_col = "时间"
+    time_col="年份"
+elif"时间" in df.columns:
+    time_col="时间"
 else:
-    x_axis_col=df.columns[0]
-    st.warning("数据中未找到'年份'或'时间'列，将默认用【{x_axis_col}】作为x轴")
-col_list=[col for col in df.columns if col !=x_axis_col]
-if not col_list:
-    st.error("当前工作表除了X轴列外，没有其他指标列可以用于可视化！")
+    time_col=None
+    st.warning("数据中未找到'年份'或'时间'列，图表功能受限")
+area_col="地区"if "地区"in df.columns else None
+metric_cols = [col for col in df.columns if col not in [time_col, area_col] and pd.api.types.is_numeric_dtype(df[col])]
+if not metric_cols:
+    st.error("当前工作表无可用数值指标，无法生成图表")
     st.stop()
-choose_col=st.selectbox("请选择需要可视化的指标",col_list)
-st.markdown("折线图")
-try:
-    line_chart=alt.Chart(df).mark_line(point=True,color='#1f77b4').encode(x=alt.X(x_axis_col, title=x_axis_col),y=alt.Y(choose_col,title=choose_col)).properties(title=f"{choose_col}随{x_axis_col}变化趋势",height=350)
+if area_col and time_col:
+    st.markdown("多地区趋势对比")
+    selected_areas = st.multiselect("选择地区（可多选）", df[area_col].unique(), default=df[area_col].unique()[:3])
+    choose_col = st.selectbox("选择要分析的指标", metric_cols)
+    filtered_df = df[df[area_col].isin(selected_areas)]
+    line_chart=alt.Chart(filtered_df).mark_line(point=True,color='#1f77b4').encode(x=alt.X(time_col, title=time_col,type="ordinal"),y=alt.Y(choose_col,title=choose_col),color=alt.Color(area_col,legend=alt.Legend(title=area_col)),tooltip=[time_col,area_col,choose_col]).properties(title=f"不同地区{choose_col}随{time_col}变化趋势",height=400)
     st.altair_chart(line_chart,use_container_width=True)
-except Exception as e:
-    st.error(f"折线图绘制失败：{e}")
-st.markdown("分布柱状图")
-try:
-    bar_chart=alt.Chart(df).mark_bar(color='#ff7f0e').encode(x=alt.X(x_axis_col, title=x_axis_col),y=alt.Y(choose_col, title=choose_col)).properties(title=f"{choose_col}按{x_axis_col}分布",height=350)
+elif time_col and not area_col:
+    st.markdown("全国历年趋势分析")
+    choose_col=st.selectbox("选择要分析的指标", metric_cols)
+    line_chart=alt.Chart(df).mark_line(point=True,color='#1f77b4').encode(x=alt.X(time_col, title=time_col,type="ordinal"),y=alt.Y(choose_col,title=choose_col)).properties(title=f"全国{choose_col}历年变化趋势",height=350)
+    st.altair_chart(line_chart,use_container_width=True)
+    bar_chart=alt.Chart(df).mark_bar(color='#ff7f0e').encode(x=alt.X(time_col, title=time_col,type="ordinal"),y=alt.Y(choose_col, title=choose_col)).properties(title=f"全国{choose_col}年度分布",height=350)
     st.altair_chart(bar_chart,use_container_width=True)
-except Exception as e:
-    st.error(f"柱状图绘制失败：{e}")
+else:
+    st.info("当前工作表无适配的可视化方式")
