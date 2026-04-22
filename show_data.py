@@ -2,6 +2,17 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 st.set_page_config(page_title="数据展示平台",layout="wide")
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}      /* 隐藏右上角菜单 */
+footer {visibility: hidden;}         /* 隐藏底部"Made with Streamlit" */
+header {visibility: hidden;}         /* 隐藏顶部条纹 */
+div[data-testid="stToolbar"] {
+    visibility: hidden; height: 0%;  /* 隐藏悬浮工具栏 */
+}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.title("数据展示平台")
 st.divider()
 excel_file = pd.ExcelFile("基础数据汇总4.21.xlsx")
