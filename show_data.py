@@ -2,13 +2,23 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 st.set_page_config(page_title="数据展示平台",layout="wide")
+# 放在 st.set_page_config 之后
 hide_streamlit_style = """
 <style>
-#MainMenu {visibility: hidden;}      /* 隐藏右上角菜单 */
-footer {visibility: hidden;}         /* 隐藏底部"Made with Streamlit" */
-header {visibility: hidden;}         /* 隐藏顶部条纹 */
+/* 隐藏右上角菜单 */
+#MainMenu {visibility: hidden !important;}
+/* 隐藏页脚 */
+footer {visibility: hidden !important;}
+/* 隐藏顶部 header */
+header {visibility: hidden !important;}
+/* 隐藏悬浮工具栏 */
 div[data-testid="stToolbar"] {
-    visibility: hidden; height: 0%;  /* 隐藏悬浮工具栏 */
+    visibility: hidden !important;
+    height: 0px !important;
+}
+/* 隐藏滚动条（可选，让界面更干净） */
+::-webkit-scrollbar {
+    display: none;
 }
 </style>
 """
