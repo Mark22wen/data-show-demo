@@ -22,7 +22,7 @@ if"年份"in df.columns:
     x_axis_col = "年份"
 elif"时间"in df.columns:
     x_axis_col = "时间"
-else：
+else:
     x_axis_col=df.columns[0]
     st.warning("数据中未找到'年份'或'时间'列，将默认用【{x_axis_col}】作为x轴")
 col_list=[col for col in df.columns if col !=x_axis_col]
@@ -31,7 +31,7 @@ if not col_list:
     st.stop()
 choose_col=st.selectbox("请选择需要可视化的指标",col_list)
 st.markdown("折线图")
-try：
+try:
     line_chart=alt.Chart(df).mark_line(point=True,color='#1f77b4').encode(x=alt.X(x_axis_col, title=x_axis_col),y=alt.Y(choose_col,title=choose_col)).properties(title=f"{choose_col}随{x_axis_col}变化趋势",height=350)
     st.altair_chart(line_chart,use_container_width=True)
 except Exception as e:
